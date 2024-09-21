@@ -25,6 +25,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
+		<fasterxml-jackson.version>2.17.2</fasterxml-jackson.version>
+		<swagger-annotations.version>2.2.23</swagger-annotations.version>
+		<jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
+		<jakarta.validation-api.version>3.1.0</jakarta.validation-api.version>
 		<lombok.version>1.18.34</lombok.version>
 
 		<!--  plugins versions-->
@@ -32,9 +36,53 @@
 		<maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
 		<tidy-maven-plugin.version>1.2.0</tidy-maven-plugin.version>
 		<versions-maven-plugin.version>2.16.0</versions-maven-plugin.version>
+
+		<maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
+		<openapi-generator.version>7.8.0</openapi-generator.version>
+		<formatter-maven-plugin.version>2.24.1</formatter-maven-plugin.version>
+		<impsort-maven-plugin.version>1.11.0</impsort-maven-plugin.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${fasterxml-jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${fasterxml-jackson.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>${swagger-annotations.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+			<version>${jakarta.annotation-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+			<version>${jakarta.validation-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openapitools</groupId>
+			<artifactId>jackson-databind-nullable</artifactId>
+			<version>0.2.6</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-databind</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -97,6 +145,100 @@
 					<execution>
 						<goals>
 							<goal>display-property-updates</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>${maven-clean-plugin.version}</version>
+				<configuration>
+					<filesets>
+						<fileset>
+							<directory>${project.basedir}/src/main/java/cloud/cholewa/discord/model</directory>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>${openapi-generator.version}</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<generatorName>java</generatorName>
+							<inputSpec>${project.basedir}/swagger/openapi.json</inputSpec>
+
+							<library>feign</library>
+							<templateDirectory>${project.basedir}/swagger/templates</templateDirectory>
+							<output>${project.basedir}</output>
+							<modelPackage>cloud.cholewa.discord.model</modelPackage>
+
+							<configOptions>
+								<hideGenerationTimestamp>true</hideGenerationTimestamp>
+								<useJakartaEe>true</useJakartaEe>
+								<generateBuilders>true</generateBuilders>
+								<useBeanValidation>true</useBeanValidation>
+								<configHelp>true</configHelp>
+							</configOptions>
+
+							<generateApis>false</generateApis>
+							<generateApiTests>false</generateApiTests>
+							<generateApiDocumentation>false</generateApiDocumentation>
+
+							<generateModelTests>false</generateModelTests>
+							<generateModelDocumentation>false</generateModelDocumentation>
+							<generateSupportingFiles>false</generateSupportingFiles>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>net.revelc.code.formatter</groupId>
+				<artifactId>formatter-maven-plugin</artifactId>
+				<version>${formatter-maven-plugin.version}</version>
+				<configuration>
+					<compilerCompliance>${java.version}</compilerCompliance>
+					<compilerSource>${java.version}</compilerSource>
+					<compilerTargetPlatform>${java.version}</compilerTargetPlatform>
+					<directories>
+						<directory>${project.basedir}/src/main/java/cloud/cholewa/discord/model</directory>
+					</directories>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>format</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>net.revelc.code</groupId>
+				<artifactId>impsort-maven-plugin</artifactId>
+				<version>${impsort-maven-plugin.version}</version>
+				<configuration>
+					<compliance>${java.version}</compliance>
+					<removeUnused>true</removeUnused>
+					<staticAfter>true</staticAfter>
+					<treatSamePackageAsUnused>true</treatSamePackageAsUnused>
+					<directories>
+						<directory>${project.basedir}/src/main/java/cloud/cholewa/discord/model</directory>
+					</directories>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>sort</goal>
 						</goals>
 					</execution>
 				</executions>
